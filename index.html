@@ -21,13 +21,26 @@
       font-weight: bold;
       color: white;
       font-size: 4vw;
+      opacity: 0;
+      transform: scale(0.8);
+      animation: popIn 0.4s forwards;
     }
+    @keyframes popIn {
+      to { opacity: 1; transform: scale(1); }
+    }
+    .ball:nth-child(1) { animation-delay: 0s; }
+    .ball:nth-child(2) { animation-delay: 0.1s; }
+    .ball:nth-child(3) { animation-delay: 0.2s; }
+    .ball:nth-child(4) { animation-delay: 0.3s; }
+    .ball:nth-child(5) { animation-delay: 0.4s; }
+    .ball:nth-child(6) { animation-delay: 0.5s; }
+    .bonus { background: #999; animation-delay: 0.6s; }
+
     .yellow { background: #f2c94c; color: #000; }
     .blue { background: #2d9cdb; }
     .red { background: #eb5757; }
     .green { background: #27ae60; }
     .gray { background: #828282; }
-    .bonus { background: #999; }
     .set { margin-bottom: 4vw; }
     .section { margin-top: 10vw; }
     button {
@@ -35,6 +48,11 @@
       font-size: 4.5vw;
       margin-top: 3vw;
       cursor: pointer;
+      background: linear-gradient(45deg, #ff8a00, #e52e71);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     .notice {
       font-size: 3.5vw;
@@ -63,6 +81,12 @@
       max-width: 400px;
       border-radius: 8px;
     }
+    .predict-title {
+      font-size: 5vw;
+      margin-top: 4vw;
+      margin-bottom: 2vw;
+      color: #e52e71;
+    }
   </style>
 </head>
 <body>
@@ -76,6 +100,7 @@
   <div class="section">
     <h1>🔮 예측 번호 5세트</h1>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
+    <div id="predictTitle" class="predict-title" style="display:none;">✨ 당신의 행운의 번호 ✨</div>
     <div id="predict"></div>
   </div>
 
@@ -96,15 +121,14 @@
         lottoData = data;
         const latest = data[data.length - 1];
 
-        // 날짜 문자열 그대로 사용
-        const formattedDate = latest.date;
+        const formattedDate = latest.date; // 날짜 삭제 요청 시 사용 안함
 
-        const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
-        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
+        const balls = latest.numbers.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
+        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
 
         document.getElementById("latest").innerHTML = `
           <div class="numbers">
-            <strong>${latest.draw_no}회차 (${formattedDate})</strong><br>${balls} ${bonus}
+            <strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}
           </div>`;
       })
       .catch(() => {
@@ -124,6 +148,7 @@
       ad.style.visibility = "visible";
       setTimeout(() => {
         ad.style.visibility = "hidden";
+        document.getElementById("predictTitle").style.display = 'block';
         generatePredictions();
       }, 3000);
     }
@@ -155,7 +180,7 @@
           set.add(n);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+        const balls = sorted.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
         predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
       }
     }
