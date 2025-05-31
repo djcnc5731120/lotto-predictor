@@ -87,6 +87,16 @@
       margin-bottom: 2vw;
       color: #e52e71;
     }
+    table {
+      margin: 0 auto;
+      font-size: 4vw;
+      border-collapse: collapse;
+      margin-top: 6vw;
+    }
+    th, td {
+      padding: 1vw;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
@@ -96,6 +106,22 @@
 
   <h1>💡 지난회차 로또 번호</h1>
   <div id="latest"></div>
+
+  <!-- 최근 로또 당첨 번호 자동 표시 -->
+  <h2>🎯 최근 로또 당첨 번호</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>회차</th>
+        <th>날짜</th>
+        <th>당첨 번호</th>
+        <th>보너스</th>
+      </tr>
+    </thead>
+    <tbody id="lottoTableBody">
+      <!-- 자바스크립트가 자동으로 채웁니다 -->
+    </tbody>
+  </table>
 
   <div class="section">
     <h1>🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h1>
@@ -111,18 +137,46 @@
     “이 번호 나올지도?” 상상해보는 맛이죠!<br>
     당첨은 운에 맡기시고, <br>
     번호 선택은 가벼운 마음으로 즐겨주세요 😉
+    
   </div>
 
   <script>
     let lottoData = [];
+
+    // 자동 로또 회차 정보 가져와 테이블에 채우기
+    async function fetchLottoRound(drawNo) {
+      const res = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${drawNo}`);
+      return await res.json();
+    }
+
+    async function showRecentRounds(count = 2) {
+      const latestDraw = 1173; // 필요시 수동 업데이트
+      const tableBody = document.getElementById("lottoTableBody");
+
+      for (let i = 0; i < count; i++) {
+        const round = latestDraw - i;
+        const data = await fetchLottoRound(round);
+        const numbers = [1,2,3,4,5,6].map(j => data[`drwtNo${j}`]).join(', ');
+        const bonus = data.bnusNo;
+        const date = data.drwNoDate ? data.drwNoDate.replace(/-/g, ".") : "-";
+
+        tableBody.innerHTML += `
+          <tr>
+            <td>${data.drwNo}회</td>
+            <td>${date}</td>
+            <td>${numbers}</td>
+            <td>${bonus}</td>
+          </tr>`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => showRecentRounds(2));
 
     fetch("lotto_data.json")
       .then(res => res.json())
       .then(data => {
         lottoData = data;
         const latest = data[data.length - 1];
-
-        const formattedDate = latest.date; // 날짜 삭제 요청 시 사용 안함
 
         const balls = latest.numbers.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
         const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
