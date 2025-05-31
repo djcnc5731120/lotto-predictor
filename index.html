@@ -38,6 +38,7 @@
     .gray { background: #828282; }
     .bonus { background: #999; }
     .set { margin-bottom: 20px; white-space: nowrap; }
+    .set-label { font-size: 20px; margin-bottom: 8px; color: #333; }
     .section { margin-top: 40px; }
     button {
       padding: 12px 24px;
@@ -105,13 +106,13 @@
 
   <script>
     const adImages = [
-      'ad1.png',
-      'ad2.png',
-      'ad3.png',
-      'ad4.png',
-      'ad5.png',
-      'ad6.png',
-      'ad7.png'
+      '1.png',
+      '2.png',
+      '3.png',
+      '4.png',
+      '5.png',
+      '6.png',
+      '7.png'
     ];
 
     function showAdThenPredict() {
@@ -162,13 +163,20 @@
         for (let j = 0; j < count; j++) pool.push(i);
       }
       for (let s = 0; s < 5; s++) {
+        const setLabel = document.createElement('div');
+        setLabel.className = 'set-label';
+        setLabel.innerText = `추천 번호 ${s+1}`;
+        predictDiv.appendChild(setLabel);
         const set = new Set();
         while (set.size < 6) {
           set.add(pool[Math.floor(Math.random() * pool.length)]);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
         const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
-        predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
+        const setDiv = document.createElement('div');
+        setDiv.className = 'set';
+        setDiv.innerHTML = balls;
+        predictDiv.appendChild(setDiv);
       }
     }
   </script>
