@@ -67,24 +67,17 @@
       color: #666;
       margin-top: 40px;
       line-height: 1.6;
+      max-width: 100%;
     }
-    #adBox {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      visibility: hidden;
+    /* 이 영역이 3초 광고가 표시될 위치 */
+    #belowNoticeAd {
+      margin-top: 20px;
+      display: none; /* 기본은 숨김 */
     }
-    #adBox img {
-      width: 90%;
+    #belowNoticeAd img {
+      width: 100%;
       max-width: 500px;
-      border-radius: 12px;
+      border-radius: 8px;
     }
     .predict-title {
       font-size: 24px;
@@ -105,38 +98,39 @@
   </style>
 </head>
 <body>
-  <!-- 광고 팝업 박스 -->
-  <div id="adBox">
-    <img id="adImage" src="" alt="광고 이미지">
-  </div>
-
-  <!-- 1. 예측 번호 섹션 -->
+  <!-- 예측 번호 섹션 -->
   <div class="section">
-    <h2 style="font-size: 15px; margin-bottom: 10px;">🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h2>
-    <h2 style="font-size: 15px; margin-bottom: 10px;">🔮아래 버튼을 누룬 후 3초만 기다리시면,</h2>
-    <h2 style="font-size: 15px; margin-bottom: 10px;">AI가 번호를 추천해 드립니다.</h2>
+    <h2 style="font-size: 24px; margin-bottom: 10px;">
+      🔮 다정씨앤씨가 드리는 행운의 예측 번호 5세트
+    </h2>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
+    <!-- 광고 후에 제목이 나타날 때까지 숨겨둡니다 -->
     <div id="predictTitle" class="predict-title" style="display:none;">
       ✨ 당신의 행운의 번호 ✨
     </div>
     <div id="predict"></div>
   </div>
 
-  <!-- 2. 공지사항 -->
+  <!-- 공지사항 -->
   <div class="notice">
     🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
     매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br>
     당첨은 운에 맡기시고, 번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
-  <!-- 3. 지난회차 로또 번호 섹션 (맨 아래) -->
+  <!-- 3초 동안 랜덤 광고가 이 위치에 표시됩니다 -->
+  <div id="belowNoticeAd">
+    <img id="adBanner" src="" alt="광고 배너">
+  </div>
+
+  <!-- 지난회차 로또 번호 섹션 (맨 아래) -->
   <div class="latest-block">
     <h1>💡 지난회차 로또 번호</h1>
     <div id="latest"></div>
   </div>
 
   <script>
-    // 광고 이미지 리스트 (1.png ~ 7.png)
+    // 7가지 랜덤 광고 이미지 (1.png ~ 7.png)
     const adImages = [
       '1.png',
       '2.png',
@@ -148,18 +142,22 @@
     ];
 
     function showAdThenPredict() {
+      // 1) 랜덤 광고 이미지 선택
       const randomIndex = Math.floor(Math.random() * adImages.length);
-      document.getElementById('adImage').src = adImages[randomIndex];
-      document.getElementById('adBox').style.visibility = 'visible';
+      document.getElementById('adBanner').src = adImages[randomIndex];
+      // 2) 광고 박스 보이기
+      const adDiv = document.getElementById('belowNoticeAd');
+      adDiv.style.display = 'block';
+      // 3) 3초 후 광고 숨기고, 추천 번호 표시
       setTimeout(() => {
-        document.getElementById('adBox').style.visibility = 'hidden';
+        adDiv.style.display = 'none';
         document.getElementById('predictTitle').style.display = 'block';
         generatePredictions();
       }, 3000);
     }
 
     let lottoData = [];
-    // 마지막 회차(예: 1173회) 정보를 JSON에서 가져와 표시
+    // 마지막 회차 정보를 JSON에서 가져와 표시
     fetch("lotto_data.json")
       .then(res => res.json())
       .then(data => {
@@ -196,12 +194,12 @@
         predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
         return;
       }
-      // 번호 빈도수 계산
+      // 빈도수 계산
       const freq = {};
-      lottoData.forEach(entry => 
+      lottoData.forEach(entry =>
         entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1)
       );
-      // 풀(pool) 배열 구성 (등장 횟수만큼 반복 삽입)
+      // 풀(pool) 배열 구성
       const pool = [];
       for (let i = 1; i <= 45; i++) {
         const count = freq[i] || 1;
