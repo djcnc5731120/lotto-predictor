@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>로또 예측기</title>
   <style>
     body {
@@ -37,6 +37,7 @@
     .green  { background: #27ae60; }
     .gray   { background: #828282; }
     .bonus  { background: #999; }
+
     .set {
       margin-bottom: 20px;
       display: flex;
@@ -69,15 +70,24 @@
       line-height: 1.6;
       max-width: 100%;
     }
-    /* 이 영역이 3초 광고가 표시될 위치 */
-    #belowNoticeAd {
-      margin-top: 20px;
-      display: none; /* 기본은 숨김 */
+    /* 팝업 광고 박스 */
+    #adBox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      visibility: hidden;
     }
-    #belowNoticeAd img {
-      width: 100%;
+    #adBox img {
+      width: 90%;
       max-width: 500px;
-      border-radius: 8px;
+      border-radius: 12px;
     }
     .predict-title {
       font-size: 24px;
@@ -95,64 +105,73 @@
     .latest-block .numbers {
       font-size: 24px;
     }
+    /* 추천 번호 아래에 표시할 고정 광고 구역 (기본 숨김) */
+    #belowPredictAd {
+      margin-top: 20px;
+      display: none;
+    }
+    #belowPredictAd img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <!-- 예측 번호 섹션 -->
+  <!-- 팝업형 광고 박스 -->
+  <div id="adBox">
+    <img id="adImage" src="" alt="광고 이미지" />
+  </div>
+
+  <!-- 1. 예측 번호 섹션 -->
   <div class="section">
     <h2 style="font-size: 24px; margin-bottom: 10px;">
-      🔮 다정씨앤씨가 드리는 행운의 예측 번호 5세트
+      🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트
     </h2>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
-    <!-- 광고 후에 제목이 나타날 때까지 숨겨둡니다 -->
     <div id="predictTitle" class="predict-title" style="display:none;">
       ✨ 당신의 행운의 번호 ✨
     </div>
     <div id="predict"></div>
+
+    <!-- 추천 번호 아래 표시될 광고 -->
+    <div id="belowPredictAd">
+      <img src="static_ad.png" alt="광고 배너" />
+    </div>
   </div>
 
-  <!-- 공지사항 -->
+  <!-- 2. 공지사항 -->
   <div class="notice">
-    🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
-    매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br>
+    🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br />
+    매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br />
     당첨은 운에 맡기시고, 번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
-  <!-- 3초 동안 랜덤 광고가 이 위치에 표시됩니다 -->
-  <div id="belowNoticeAd">
-    <img id="adBanner" src="" alt="광고 배너">
-  </div>
-
-  <!-- 지난회차 로또 번호 섹션 (맨 아래) -->
+  <!-- 3. 지난회차 로또 번호 섹션 (맨 아래) -->
   <div class="latest-block">
     <h1>💡 지난회차 로또 번호</h1>
     <div id="latest"></div>
   </div>
 
   <script>
-    // 7가지 랜덤 광고 이미지 (1.png ~ 7.png)
+    // 팝업 광고 이미지 배열 (1.png ~ 7.png)
     const adImages = [
-      '1.png',
-      '2.png',
-      '3.png',
-      '4.png',
-      '5.png',
-      '6.png',
-      '7.png'
+      '1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png'
     ];
 
     function showAdThenPredict() {
-      // 1) 랜덤 광고 이미지 선택
+      // 랜덤 팝업 광고 이미지 설정
       const randomIndex = Math.floor(Math.random() * adImages.length);
-      document.getElementById('adBanner').src = adImages[randomIndex];
-      // 2) 광고 박스 보이기
-      const adDiv = document.getElementById('belowNoticeAd');
-      adDiv.style.display = 'block';
-      // 3) 3초 후 광고 숨기고, 추천 번호 표시
+      document.getElementById('adImage').src = adImages[randomIndex];
+      // 팝업 광고 노출
+      document.getElementById('adBox').style.visibility = 'visible';
+      // 3초 후 팝업 숨기고 추천 번호 및 하단 광고 표시
       setTimeout(() => {
-        adDiv.style.display = 'none';
+        document.getElementById('adBox').style.visibility = 'hidden';
         document.getElementById('predictTitle').style.display = 'block';
         generatePredictions();
+        // 추천 번호 생성 후 하단 광고 구역 표시
+        document.getElementById('belowPredictAd').style.display = 'block';
       }, 3000);
     }
 
@@ -166,8 +185,7 @@
         const balls = latest.numbers
           .map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`)
           .join('');
-        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span>
-                       <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
+        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
         document.getElementById("latest").innerHTML = `
           <div class="numbers">
             <strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}
@@ -196,31 +214,25 @@
       }
       // 빈도수 계산
       const freq = {};
-      lottoData.forEach(entry =>
-        entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1)
-      );
-      // 풀(pool) 배열 구성
+      lottoData.forEach(entry => entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1));
+      // 풀(pool) 배열 생성
       const pool = [];
       for (let i = 1; i <= 45; i++) {
         const count = freq[i] || 1;
         for (let j = 0; j < count; j++) pool.push(i);
       }
-      // 5세트 생성
+      // 5세트
       for (let s = 0; s < 5; s++) {
-        // 레이블 추가
         const setLabel = document.createElement('div');
         setLabel.className = 'set-label';
         setLabel.innerText = `추천 번호 ${s + 1}`;
         predictDiv.appendChild(setLabel);
-        // 6개 번호 뽑기
         const set = new Set();
         while (set.size < 6) {
           set.add(pool[Math.floor(Math.random() * pool.length)]);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted
-          .map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`)
-          .join('');
+        const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
         const setDiv = document.createElement('div');
         setDiv.className = 'set';
         setDiv.innerHTML = balls;
