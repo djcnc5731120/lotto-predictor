@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로또 예측기</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    h1 { margin-bottom: 10px; }
+    .numbers, .draws { font-size: 18px; margin: 10px 0; }
+    .ball {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      margin: 4px;
+      border-radius: 50%;
+      font-weight: bold;
+      color: white;
+    }
+    .bonus { background: #999; }
+    .set { margin-bottom: 16px; }
+    .section { margin-top: 40px; }
+    .yellow { background: #f2c94c; color: #000; }
+    .blue { background: #2d9cdb; }
+    .red { background: #eb5757; }
+    .green { background: #27ae60; }
+    .gray { background: #828282; }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>💡 최신 로또 번호</h1>
+  <div id="latest"></div>
+
+  <div class="section">
+    <h1>🔮 예측 번호 5세트</h1>
+    <button onclick="generatePredictions()">예측 번호 추첨하기</button>
+    <div id="predict"></div>
+  </div>
+
+  <script>
+    function getColorClass(n) {
+      if (n <= 10) return 'yellow';
+      if (n <= 20) return 'blue';
+      if (n <= 30) return 'red';
+      if (n <= 40) return 'green';
+      return 'gray';
+    }
+
+    let lottoData = [];
+
+    fetch("lotto_data.json")
+      .then(res => res.json())
+      .then(data => {
+        lottoData = data;
+
+        // 최신 회차 표시
+        const latest = data[data.length - 1];
+        document.getElementById("latest").innerHTML = `
+          <div class="numbers">
+            <strong>${latest.draw_no}회차 (${latest.date})</strong><br>
+            ${latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('')}
+            <span style="color: gray; font-weight: normal">+ 보너스</span>
+            <span class='ball bonus'>${latest.bonus}</span>
+          </div>`;
+      })
+      .catch(() => {
+        document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
+      });
+
+    function generatePredictions() {
+      const predictDiv = document.getElementById("predict");
+      predictDiv.innerHTML = "";
+
+      if (lottoData.length === 0) {
+        predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
+        return;
+      }
+
+      const allNumbers = {};
+      lottoData.forEach(entry => {
+        entry.numbers.forEach(num => allNumbers[num] = (allNumbers[num] || 0) + 1);
+      });
+
+      const pool = [];
+      for (let i = 1; i <= 45; i++) {
+        const count = allNumbers[i] || 1;
+        for (let j = 0; j < count; j++) pool.push(i);
+      }
+
+      for (let s = 0; s < 5; s++) {
+        const set = new Set();
+        while (set.size < 6) {
+          const n = pool[Math.floor(Math.random() * pool.length)];
+          set.add(n);
+        }
+        const sorted = Array.from(set).sort((a, b) => a - b);
+        predictDiv.innerHTML += `<div class='set'>${sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('')}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
