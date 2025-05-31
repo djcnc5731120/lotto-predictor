@@ -88,32 +88,28 @@
   <script>
     let lottoData = [];
 
-<script>
-  let lottoData = [];
+    fetch("lotto_data.json")
+      .then(res => res.json())
+      .then(data => {
+        lottoData = data;
+        const latest = data[data.length - 1];
 
-  fetch("lotto_data.json")
-    .then(res => res.json())
-    .then(data => {
-      lottoData = data;
-      const latest = data[data.length - 1];
+        // 날짜 한국식으로 표시 + 요일
+        const dateStr = new Date(latest.date);
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const formattedDate = `${dateStr.getFullYear()}년 ${dateStr.getMonth() + 1}월 ${dateStr.getDate()}일 (${days[dateStr.getDay()]})`;
 
-      // 날짜를 한국식으로 변환
-      const dateStr = new Date(latest.date);
-      const formattedDate = `${dateStr.getFullYear()}년 ${dateStr.getMonth() + 1}월 ${dateStr.getDate()}일`;
+        const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
 
-      const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
-      const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
-
-      document.getElementById("latest").innerHTML = `
-        <div class="numbers">
-          <strong>${latest.draw_no}회차 (${formattedDate})</strong><br>${balls} ${bonus}
-        </div>`;
-    })
-    .catch(() => {
-      document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
-    });
-</script>
-
+        document.getElementById("latest").innerHTML = `
+          <div class="numbers">
+            <strong>${latest.draw_no}회차 (${formattedDate})</strong><br>${balls} ${bonus}
+          </div>`;
+      })
+      .catch(() => {
+        document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
+      });
 
     function getColorClass(n) {
       if (n <= 10) return 'yellow';
