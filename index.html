@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>로또 예측기</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       padding: 5vw;
-      box-sizing: border-box;
     }
     .ball {
       display: inline-block;
@@ -28,21 +27,13 @@
     @keyframes popIn {
       to { opacity: 1; transform: scale(1); }
     }
-    .ball:nth-child(1) { animation-delay: 0s; }
-    .ball:nth-child(2) { animation-delay: 0.1s; }
-    .ball:nth-child(3) { animation-delay: 0.2s; }
-    .ball:nth-child(4) { animation-delay: 0.3s; }
-    .ball:nth-child(5) { animation-delay: 0.4s; }
-    .ball:nth-child(6) { animation-delay: 0.5s; }
-    .bonus { background: #999; animation-delay: 0.6s; }
-
     .yellow { background: #f2c94c; color: #000; }
     .blue { background: #2d9cdb; }
     .red { background: #eb5757; }
     .green { background: #27ae60; }
     .gray { background: #828282; }
-    .set { margin-bottom: 4vw; }
-    .section { margin-top: 10vw; }
+    .bonus { background: #999; }
+
     button {
       padding: 3vw 6vw;
       font-size: 4.5vw;
@@ -54,58 +45,50 @@
       color: white;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
-    .notice {
-      font-size: 3.5vw;
-      color: #666;
-      margin-top: 8vw;
-      max-width: 90vw;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
+
     #adBox {
+      display: none;
+      justify-content: center;
+      align-items: center;
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
       background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       z-index: 999;
-      visibility: hidden;
     }
     #adBox img {
-      width: 80vw;
-      max-width: 400px;
+      max-width: 80%;
       border-radius: 8px;
     }
     .predict-title {
       font-size: 5vw;
       margin-top: 4vw;
-      margin-bottom: 2vw;
       color: #e52e71;
+      display: none;
     }
+    .set { margin-bottom: 4vw; }
   </style>
 </head>
 <body>
   <div id="adBox">
-    <img src="ad.jpg" alt="광고 이미지">
+    <img src="ad.png" alt="광고 이미지">
   </div>
 
-  <h1>💡 지난회차 로또 번호</h1>
-  <div id="latest"></div>
+  <h1>💡 최신 로또 번호</h1>
+  <div id="latest">불러오는 중...</div>
 
   <div class="section">
     <h1>🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h1>
     <h1>🔮 아래 버튼을 누르면 추첨 번호가 나타납니다.</h1>
+
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
-    <div id="predictTitle" class="predict-title" style="display:none;">✨ 당신의 행운의 번호 ✨</div>
+    <div id="predictTitle" class="predict-title">✨ 당신의 행운의 번호 ✨</div>
     <div id="predict"></div>
   </div>
 
-  <div class="notice">
+   <div class="notice">
     🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
     매주 바뀌는 번호를 보고<br>
     “이 번호 나올지도?” 상상해보는 맛이죠!<br>
@@ -113,6 +96,7 @@
     번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
+  
   <script>
     let lottoData = [];
 
@@ -121,22 +105,17 @@
       .then(data => {
         lottoData = data;
         const latest = data[data.length - 1];
-
-        const formattedDate = latest.date; // 날짜 삭제 요청 시 사용 안함
-
-        const balls = latest.numbers.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
-        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
-
-        document.getElementById("latest").innerHTML = `
-          <div class="numbers">
-            <strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}
-          </div>`;
+        const balls = latest.numbers
+          .map(n => `<span class="ball ${getColor(n)}">${n}</span>`)
+          .join('');
+        const bonus = `<span style="color: gray">+ 보너스</span> <span class="ball bonus">${latest.bonus}</span>`;
+        document.getElementById("latest").innerHTML = `<strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}`;
       })
       .catch(() => {
         document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
       });
 
-    function getColorClass(n) {
+    function getColor(n) {
       if (n <= 10) return 'yellow';
       if (n <= 20) return 'blue';
       if (n <= 30) return 'red';
@@ -146,10 +125,10 @@
 
     function showAdThenPredict() {
       const ad = document.getElementById("adBox");
-      ad.style.visibility = "visible";
+      ad.style.display = "flex";
       setTimeout(() => {
-        ad.style.visibility = "hidden";
-        document.getElementById("predictTitle").style.display = 'block';
+        ad.style.display = "none";
+        document.getElementById("predictTitle").style.display = "block";
         generatePredictions();
       }, 3000);
     }
@@ -157,20 +136,11 @@
     function generatePredictions() {
       const predictDiv = document.getElementById("predict");
       predictDiv.innerHTML = "";
-
-      if (lottoData.length === 0) {
-        predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
-        return;
-      }
-
-      const allNumbers = {};
-      lottoData.forEach(entry => {
-        entry.numbers.forEach(num => allNumbers[num] = (allNumbers[num] || 0) + 1);
-      });
-
+      const freq = {};
+      lottoData.forEach(d => d.numbers.forEach(n => freq[n] = (freq[n] || 0) + 1));
       const pool = [];
       for (let i = 1; i <= 45; i++) {
-        const count = allNumbers[i] || 1;
+        const count = freq[i] || 1;
         for (let j = 0; j < count; j++) pool.push(i);
       }
 
@@ -180,9 +150,9 @@
           const n = pool[Math.floor(Math.random() * pool.length)];
           set.add(n);
         }
-        const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
-        predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
+        const sorted = [...set].sort((a, b) => a - b);
+        const balls = sorted.map(n => `<span class="ball ${getColor(n)}">${n}</span>`).join('');
+        predictDiv.innerHTML += `<div class="set">${balls}</div>`;
       }
     }
   </script>
