@@ -88,21 +88,32 @@
   <script>
     let lottoData = [];
 
-    fetch("lotto_data.json")
-      .then(res => res.json())
-      .then(data => {
-        lottoData = data;
-        const latest = data[data.length - 1];
-        const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
-        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
-        document.getElementById("latest").innerHTML = `
-          <div class="numbers">
-            <strong>${latest.draw_no}회차 (${latest.date})</strong><br>${balls} ${bonus}
-          </div>`;
-      })
-      .catch(() => {
-        document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
-      });
+<script>
+  let lottoData = [];
+
+  fetch("lotto_data.json")
+    .then(res => res.json())
+    .then(data => {
+      lottoData = data;
+      const latest = data[data.length - 1];
+
+      // 날짜를 한국식으로 변환
+      const dateStr = new Date(latest.date);
+      const formattedDate = `${dateStr.getFullYear()}년 ${dateStr.getMonth() + 1}월 ${dateStr.getDate()}일`;
+
+      const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+      const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
+
+      document.getElementById("latest").innerHTML = `
+        <div class="numbers">
+          <strong>${latest.draw_no}회차 (${formattedDate})</strong><br>${balls} ${bonus}
+        </div>`;
+    })
+    .catch(() => {
+      document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
+    });
+</script>
+
 
     function getColorClass(n) {
       if (n <= 10) return 'yellow';
