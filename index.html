@@ -136,7 +136,7 @@
 
     <!-- 추천 번호 아래 표시될 광고 -->
     <div id="belowPredictAd">
-      <img src="static_ad.png" alt="광고 배너" />
+      <img id="belowAdImage" src="" alt="광고 배너" />
     </div>
   </div>
 
@@ -170,7 +170,9 @@
         document.getElementById('adBox').style.visibility = 'hidden';
         document.getElementById('predictTitle').style.display = 'block';
         generatePredictions();
-        // 추천 번호 생성 후 하단 광고 구역 표시
+        // 추천 번호 생성 후 하단 광고 구역 표시 및 랜덤 광고 설정
+        const belowRandomIndex = Math.floor(Math.random() * adImages.length);
+        document.getElementById('belowAdImage').src = adImages[belowRandomIndex];
         document.getElementById('belowPredictAd').style.display = 'block';
       }, 3000);
     }
@@ -183,7 +185,7 @@
         lottoData = data;
         const latest = data[data.length - 1];
         const balls = latest.numbers
-          .map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`)
+          .map((n, i) => `<span class='ball ${getColorClass(n)}' style=\"animation-delay:${i*0.1}s\">${n}</span>`)
           .join('');
         const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
         document.getElementById("latest").innerHTML = `
