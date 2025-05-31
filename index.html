@@ -37,7 +37,7 @@
     .green { background: #27ae60; }
     .gray { background: #828282; }
     .bonus { background: #999; }
-    .set { margin-bottom: 20px; }
+    .set { margin-bottom: 20px; white-space: nowrap; }
     .section { margin-top: 40px; }
     button {
       padding: 12px 24px;
@@ -92,7 +92,6 @@
 
   <div class="section">
     <h2 style="font-size: 24px; margin-bottom: 10px;">🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h2>
-    <h2 style="font-size: 24px; margin-bottom: 10px;">🔮아래 버튼을 누르면 추첨 번호가 나타납니다.</h2>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
     <div id="predictTitle" class="predict-title" style="display:none;">✨ 당신의 행운의 번호 ✨</div>
     <div id="predict"></div>
@@ -106,13 +105,13 @@
 
   <script>
     const adImages = [
-      '1.png',
-      '2.png',
-      '3.png',
-      '4.png',
-      '5.png',
-      '6.png',
-      '7.png'
+      'ad1.png',
+      'ad2.png',
+      'ad3.png',
+      'ad4.png',
+      'ad5.png',
+      'ad6.png',
+      'ad7.png'
     ];
 
     function showAdThenPredict() {
