@@ -32,14 +32,25 @@
     }
 
     .yellow { background: #f2c94c; color: #000; }
-    .blue { background: #2d9cdb; }
-    .red { background: #eb5757; }
-    .green { background: #27ae60; }
-    .gray { background: #828282; }
-    .bonus { background: #999; }
-    .set { margin-bottom: 20px; display: flex; justify-content: center; flex-wrap: wrap; }
-    .set-label { font-size: 20px; margin-bottom: 8px; color: #333; }
-    .section { margin-top: 40px; }
+    .blue   { background: #2d9cdb; }
+    .red    { background: #eb5757; }
+    .green  { background: #27ae60; }
+    .gray   { background: #828282; }
+    .bonus  { background: #999; }
+    .set {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .set-label {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .section {
+      margin-top: 40px;
+    }
     button {
       padding: 12px 24px;
       font-size: 24px;
@@ -81,32 +92,51 @@
       margin-bottom: 10px;
       color: #e52e71;
     }
+    .latest-block {
+      margin-top: 60px;
+    }
+    .latest-block h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .latest-block .numbers {
+      font-size: 24px;
+    }
   </style>
 </head>
 <body>
+  <!-- 광고 팝업 박스 -->
   <div id="adBox">
     <img id="adImage" src="" alt="광고 이미지">
   </div>
 
-  <h1 style="font-size: 28px; margin-bottom: 10px;">💡 지난회차 로또 번호</h1>
-  <div id="latest"></div>
-
+  <!-- 1. 예측 번호 섹션 -->
   <div class="section">
     <h2 style="font-size: 15px; margin-bottom: 10px;">🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h2>
     <h2 style="font-size: 15px; margin-bottom: 10px;">🔮아래 버튼을 누룬 후 3초만 기다리시면,</h2>
     <h2 style="font-size: 15px; margin-bottom: 10px;">AI가 번호를 추천해 드립니다.</h2>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
-    <div id="predictTitle" class="predict-title" style="display:none;">✨ 당신의 행운의 번호 ✨</div>
+    <div id="predictTitle" class="predict-title" style="display:none;">
+      ✨ 당신의 행운의 번호 ✨
+    </div>
     <div id="predict"></div>
   </div>
 
+  <!-- 2. 공지사항 -->
   <div class="notice">
     🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
     매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br>
     당첨은 운에 맡기시고, 번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
+  <!-- 3. 지난회차 로또 번호 섹션 (맨 아래) -->
+  <div class="latest-block">
+    <h1>💡 지난회차 로또 번호</h1>
+    <div id="latest"></div>
+  </div>
+
   <script>
+    // 광고 이미지 리스트 (1.png ~ 7.png)
     const adImages = [
       '1.png',
       '2.png',
@@ -129,19 +159,27 @@
     }
 
     let lottoData = [];
+    // 마지막 회차(예: 1173회) 정보를 JSON에서 가져와 표시
     fetch("lotto_data.json")
       .then(res => res.json())
       .then(data => {
         lottoData = data;
         const latest = data[data.length - 1];
-        const balls = latest.numbers.map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
-        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
-        document.getElementById("latest").innerHTML = `<div class="numbers"><strong style="font-size:24px;">${latest.draw_no}회차</strong><br>${balls} ${bonus}</div>`;
+        const balls = latest.numbers
+          .map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`)
+          .join('');
+        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span>
+                       <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
+        document.getElementById("latest").innerHTML = `
+          <div class="numbers">
+            <strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}
+          </div>`;
       })
       .catch(() => {
         document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
       });
 
+    // 공 색 지정
     function getColorClass(n) {
       if (n <= 10) return 'yellow';
       if (n <= 20) return 'blue';
@@ -150,6 +188,7 @@
       return 'gray';
     }
 
+    // 예측 번호 5세트 생성
     function generatePredictions() {
       const predictDiv = document.getElementById("predict");
       predictDiv.innerHTML = "";
@@ -157,24 +196,33 @@
         predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
         return;
       }
+      // 번호 빈도수 계산
       const freq = {};
-      lottoData.forEach(entry => entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1));
+      lottoData.forEach(entry => 
+        entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1)
+      );
+      // 풀(pool) 배열 구성 (등장 횟수만큼 반복 삽입)
       const pool = [];
       for (let i = 1; i <= 45; i++) {
         const count = freq[i] || 1;
         for (let j = 0; j < count; j++) pool.push(i);
       }
+      // 5세트 생성
       for (let s = 0; s < 5; s++) {
+        // 레이블 추가
         const setLabel = document.createElement('div');
         setLabel.className = 'set-label';
-        setLabel.innerText = `추천 번호 ${s+1}`;
+        setLabel.innerText = `추천 번호 ${s + 1}`;
         predictDiv.appendChild(setLabel);
+        // 6개 번호 뽑기
         const set = new Set();
         while (set.size < 6) {
           set.add(pool[Math.floor(Math.random() * pool.length)]);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+        const balls = sorted
+          .map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`)
+          .join('');
         const setDiv = document.createElement('div');
         setDiv.className = 'set';
         setDiv.innerHTML = balls;
