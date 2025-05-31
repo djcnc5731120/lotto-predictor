@@ -8,19 +8,21 @@
     body {
       font-family: sans-serif;
       text-align: center;
-      padding: 5vw;
+      padding: 20px;
       box-sizing: border-box;
+      max-width: 800px;
+      margin: 0 auto;
     }
     .ball {
       display: inline-block;
-      width: 9vw;
-      height: 9vw;
-      line-height: 9vw;
-      margin: 1vw;
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      margin: 5px;
       border-radius: 50%;
       font-weight: bold;
       color: white;
-      font-size: 4vw;
+      font-size: 24px;
       opacity: 0;
       transform: scale(0.8);
       animation: popIn 0.4s forwards;
@@ -35,26 +37,23 @@
     .green { background: #27ae60; }
     .gray { background: #828282; }
     .bonus { background: #999; }
-    .set { margin-bottom: 4vw; }
-    .section { margin-top: 10vw; }
+    .set { margin-bottom: 20px; }
+    .section { margin-top: 40px; }
     button {
-      padding: 3vw 6vw;
-      font-size: 4.5vw;
-      margin-top: 3vw;
+      padding: 12px 24px;
+      font-size: 24px;
+      margin-top: 20px;
       cursor: pointer;
       background: linear-gradient(45deg, #ff8a00, #e52e71);
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: white;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     .notice {
-      font-size: 3.5vw;
+      font-size: 16px;
       color: #666;
-      margin-top: 8vw;
-      max-width: 90vw;
-      margin-left: auto;
-      margin-right: auto;
+      margin-top: 40px;
       line-height: 1.6;
     }
     #adBox {
@@ -71,14 +70,14 @@
       visibility: hidden;
     }
     #adBox img {
-      width: 95vw;
-      max-width: 550px;
+      width: 90%;
+      max-width: 500px;
       border-radius: 12px;
     }
     .predict-title {
-      font-size: 5vw;
-      margin-top: 4vw;
-      margin-bottom: 2vw;
+      font-size: 24px;
+      margin-top: 20px;
+      margin-bottom: 10px;
       color: #e52e71;
     }
   </style>
@@ -88,12 +87,11 @@
     <img id="adImage" src="" alt="광고 이미지">
   </div>
 
-  <h1>💡 지난회차 로또 번호</h1>
+  <h1 style="font-size: 28px; margin-bottom: 10px;">💡 지난회차 로또 번호</h1>
   <div id="latest"></div>
 
   <div class="section">
-    <h1>🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h1>
-    <h1>🔮 아래 버튼을 누르면 추첨 번호가 나타납니다.</h1>
+    <h2 style="font-size: 24px; margin-bottom: 10px;">🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h2>
     <button onclick="showAdThenPredict()">예측 번호 추첨하기</button>
     <div id="predictTitle" class="predict-title" style="display:none;">✨ 당신의 행운의 번호 ✨</div>
     <div id="predict"></div>
@@ -101,52 +99,41 @@
 
   <div class="notice">
     🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
-    매주 바뀌는 번호를 보고<br>
-    “이 번호 나올지도?” 상상해보는 맛이죠!<br>
-    당첨은 운에 맡기시고, <br>
-    번호 선택은 가벼운 마음으로 즐겨주세요 😉
+    매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br>
+    당첨은 운에 맡기시고, 번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
   <script>
     const adImages = [
-      '1.png',
-      '2.png',
-      '3.png',
-      '4.png',
-      '5.png',
-      '6.png',
-      '7.png'
+      'ad1.png',
+      'ad2.png',
+      'ad3.png',
+      'ad4.png',
+      'ad5.png',
+      'ad6.png',
+      'ad7.png'
     ];
 
     function showAdThenPredict() {
       const randomIndex = Math.floor(Math.random() * adImages.length);
-      const adImgElement = document.getElementById('adImage');
-      adImgElement.src = adImages[randomIndex];
-
-      const adBox = document.getElementById('adBox');
-      adBox.style.visibility = 'visible';
+      document.getElementById('adImage').src = adImages[randomIndex];
+      document.getElementById('adBox').style.visibility = 'visible';
       setTimeout(() => {
-        adBox.style.visibility = 'hidden';
+        document.getElementById('adBox').style.visibility = 'hidden';
         document.getElementById('predictTitle').style.display = 'block';
         generatePredictions();
       }, 3000);
     }
 
     let lottoData = [];
-
     fetch("lotto_data.json")
       .then(res => res.json())
       .then(data => {
         lottoData = data;
         const latest = data[data.length - 1];
-
         const balls = latest.numbers.map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
         const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
-
-        document.getElementById("latest").innerHTML = `
-          <div class="numbers">
-            <strong>${latest.draw_no}회차</strong><br>${balls} ${bonus}
-          </div>`;
+        document.getElementById("latest").innerHTML = `<div class="numbers"><strong style="font-size:24px;">${latest.draw_no}회차</strong><br>${balls} ${bonus}</div>`;
       })
       .catch(() => {
         document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
@@ -163,31 +150,24 @@
     function generatePredictions() {
       const predictDiv = document.getElementById("predict");
       predictDiv.innerHTML = "";
-
-      if (lottoData.length === 0) {
+      if (!lottoData.length) {
         predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
         return;
       }
-
-      const allNumbers = {};
-      lottoData.forEach(entry => {
-        entry.numbers.forEach(num => allNumbers[num] = (allNumbers[num] || 0) + 1);
-      });
-
+      const freq = {};
+      lottoData.forEach(entry => entry.numbers.forEach(num => freq[num] = (freq[num] || 0) + 1));
       const pool = [];
       for (let i = 1; i <= 45; i++) {
-        const count = allNumbers[i] || 1;
+        const count = freq[i] || 1;
         for (let j = 0; j < count; j++) pool.push(i);
       }
-
       for (let s = 0; s < 5; s++) {
         const set = new Set();
         while (set.size < 6) {
-          const n = pool[Math.floor(Math.random() * pool.length)];
-          set.add(n);
+          set.add(pool[Math.floor(Math.random() * pool.length)]);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted.map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
+        const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
         predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
       }
     }
