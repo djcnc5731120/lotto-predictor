@@ -28,19 +28,13 @@
     @keyframes popIn {
       to { opacity: 1; transform: scale(1); }
     }
-    .ball:nth-child(1) { animation-delay: 0s; }
-    .ball:nth-child(2) { animation-delay: 0.1s; }
-    .ball:nth-child(3) { animation-delay: 0.2s; }
-    .ball:nth-child(4) { animation-delay: 0.3s; }
-    .ball:nth-child(5) { animation-delay: 0.4s; }
-    .ball:nth-child(6) { animation-delay: 0.5s; }
-    .bonus { background: #999; animation-delay: 0.6s; }
 
     .yellow { background: #f2c94c; color: #000; }
     .blue { background: #2d9cdb; }
     .red { background: #eb5757; }
     .green { background: #27ae60; }
     .gray { background: #828282; }
+    .bonus { background: #999; }
     .set { margin-bottom: 4vw; }
     .section { margin-top: 10vw; }
     button {
@@ -87,42 +81,15 @@
       margin-bottom: 2vw;
       color: #e52e71;
     }
-    table {
-      margin: 0 auto;
-      font-size: 4vw;
-      border-collapse: collapse;
-      margin-top: 6vw;
-    }
-    th, td {
-      padding: 1vw;
-      border: 1px solid #ccc;
-    }
   </style>
 </head>
 <body>
   <div id="adBox">
-    <img src="ad.png" alt="광고 이미지">
+    <img id="adImage" src="" alt="광고 이미지">
   </div>
 
   <h1>💡 지난회차 로또 번호</h1>
   <div id="latest"></div>
-
-  <!-- 최근 로또 당첨 번호 자동 표시 -->
-  <h2>🎯 다정씨앤씨 취급 품목 🎯</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>삼성전자</th>
-        <th>노트북</th>
-        <th>데스크탑</th>
-        <th>태블릿</th>
-        <th>복합기 소모품</th>
-      </tr>
-    </thead>
-    <tbody id="lottoTableBody">
-      <!-- 자바스크립트가 자동으로 채웁니다 -->
-    </tbody>
-  </table>
 
   <div class="section">
     <h1>🔮다정씨앤씨가 드리는 행운의 예측 번호 5세트</h1>
@@ -138,40 +105,33 @@
     “이 번호 나올지도?” 상상해보는 맛이죠!<br>
     당첨은 운에 맡기시고, <br>
     번호 선택은 가벼운 마음으로 즐겨주세요 😉
-    
   </div>
 
   <script>
+    const adImages = [
+      '1.png',
+      '2.png',
+      '3.png',
+      '4.png',
+      '5.png',
+      '6.png'
+    ];
+
+    function showAdThenPredict() {
+      const randomIndex = Math.floor(Math.random() * adImages.length);
+      const adImgElement = document.getElementById('adImage');
+      adImgElement.src = adImages[randomIndex];
+
+      const adBox = document.getElementById('adBox');
+      adBox.style.visibility = 'visible';
+      setTimeout(() => {
+        adBox.style.visibility = 'hidden';
+        document.getElementById('predictTitle').style.display = 'block';
+        generatePredictions();
+      }, 3000);
+    }
+
     let lottoData = [];
-
-    // 자동 로또 회차 정보 가져와 테이블에 채우기
-    async function fetchLottoRound(drawNo) {
-      const res = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${drawNo}`);
-      return await res.json();
-    }
-
-    async function showRecentRounds(count = 2) {
-      const latestDraw = 1173; // 필요시 수동 업데이트
-      const tableBody = document.getElementById("lottoTableBody");
-
-      for (let i = 0; i < count; i++) {
-        const round = latestDraw - i;
-        const data = await fetchLottoRound(round);
-        const numbers = [1,2,3,4,5,6].map(j => data[`drwtNo${j}`]).join(', ');
-        const bonus = data.bnusNo;
-        const date = data.drwNoDate ? data.drwNoDate.replace(/-/g, ".") : "-";
-
-        tableBody.innerHTML += `
-          <tr>
-            <td>${data.drwNo}회</td>
-            <td>${date}</td>
-            <td>${numbers}</td>
-            <td>${bonus}</td>
-          </tr>`;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => showRecentRounds(2));
 
     fetch("lotto_data.json")
       .then(res => res.json())
@@ -179,7 +139,7 @@
         lottoData = data;
         const latest = data[data.length - 1];
 
-        const balls = latest.numbers.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
+        const balls = latest.numbers.map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
         const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus' style="animation-delay:0.6s">${latest.bonus}</span>`;
 
         document.getElementById("latest").innerHTML = `
@@ -197,16 +157,6 @@
       if (n <= 30) return 'red';
       if (n <= 40) return 'green';
       return 'gray';
-    }
-
-    function showAdThenPredict() {
-      const ad = document.getElementById("adBox");
-      ad.style.visibility = "visible";
-      setTimeout(() => {
-        ad.style.visibility = "hidden";
-        document.getElementById("predictTitle").style.display = 'block';
-        generatePredictions();
-      }, 3000);
     }
 
     function generatePredictions() {
@@ -236,7 +186,7 @@
           set.add(n);
         }
         const sorted = Array.from(set).sort((a, b) => a - b);
-        const balls = sorted.map((n,i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
+        const balls = sorted.map((n, i) => `<span class='ball ${getColorClass(n)}' style="animation-delay:${i*0.1}s">${n}</span>`).join('');
         predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
       }
     }
