@@ -11,10 +11,40 @@
       padding: 5vw;
       box-sizing: border-box;
     }
-    .ball { /* ... 공 스타일 생략 (기존과 동일) ... */ }
-    /* ... 나머지 기존 스타일 생략 ... */
-
-    /* 광고 오버레이 */
+    .ball {
+      display: inline-block;
+      width: 9vw;
+      height: 9vw;
+      line-height: 9vw;
+      margin: 1vw;
+      border-radius: 50%;
+      font-weight: bold;
+      color: white;
+      font-size: 4vw;
+    }
+    .yellow { background: #f2c94c; color: #000; }
+    .blue { background: #2d9cdb; }
+    .red { background: #eb5757; }
+    .green { background: #27ae60; }
+    .gray { background: #828282; }
+    .bonus { background: #999; }
+    .set { margin-bottom: 4vw; }
+    .section { margin-top: 10vw; }
+    button {
+      padding: 3vw 6vw;
+      font-size: 4.5vw;
+      margin-top: 3vw;
+      cursor: pointer;
+    }
+    .notice {
+      font-size: 3.5vw;
+      color: #666;
+      margin-top: 8vw;
+      max-width: 90vw;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
     #adBox {
       position: fixed;
       top: 0;
@@ -56,14 +86,23 @@
   </div>
 
   <script>
-    function showAdThenPredict() {
-      const ad = document.getElementById("adBox");
-      ad.style.visibility = "visible";
-      setTimeout(() => {
-        ad.style.visibility = "hidden";
-        generatePredictions();
-      }, 3000); // 광고 3초 후 예측 실행
-    }
+    let lottoData = [];
+
+    fetch("lotto_data.json")
+      .then(res => res.json())
+      .then(data => {
+        lottoData = data;
+        const latest = data[data.length - 1];
+        const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+        const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
+        document.getElementById("latest").innerHTML = `
+          <div class="numbers">
+            <strong>${latest.draw_no}회차 (${latest.date})</strong><br>${balls} ${bonus}
+          </div>`;
+      })
+      .catch(() => {
+        document.getElementById("latest").innerText = "⚠️ 데이터를 불러올 수 없습니다.";
+      });
 
     function getColorClass(n) {
       if (n <= 10) return 'yellow';
@@ -73,7 +112,46 @@
       return 'gray';
     }
 
-    // fetch, lottoData, generatePredictions 함수 등은 그대로 유지합니다.
+    function showAdThenPredict() {
+      const ad = document.getElementById("adBox");
+      ad.style.visibility = "visible";
+      setTimeout(() => {
+        ad.style.visibility = "hidden";
+        generatePredictions();
+      }, 3000);
+    }
+
+    function generatePredictions() {
+      const predictDiv = document.getElementById("predict");
+      predictDiv.innerHTML = "";
+
+      if (lottoData.length === 0) {
+        predictDiv.innerText = "⚠️ 예측 데이터를 불러올 수 없습니다.";
+        return;
+      }
+
+      const allNumbers = {};
+      lottoData.forEach(entry => {
+        entry.numbers.forEach(num => allNumbers[num] = (allNumbers[num] || 0) + 1);
+      });
+
+      const pool = [];
+      for (let i = 1; i <= 45; i++) {
+        const count = allNumbers[i] || 1;
+        for (let j = 0; j < count; j++) pool.push(i);
+      }
+
+      for (let s = 0; s < 5; s++) {
+        const set = new Set();
+        while (set.size < 6) {
+          const n = pool[Math.floor(Math.random() * pool.length)];
+          set.add(n);
+        }
+        const sorted = Array.from(set).sort((a, b) => a - b);
+        const balls = sorted.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
+        predictDiv.innerHTML += `<div class='set'>${balls}</div>`;
+      }
+    }
   </script>
 </body>
 </html>
