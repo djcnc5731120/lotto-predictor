@@ -81,8 +81,10 @@
 
   <div class="notice">
     🎲 이 페이지는 통계 기반 재미용 로또 예측기입니다.<br>
-    매주 바뀌는 번호를 보고 “이 번호 나올지도?” 상상해보는 맛이죠!<br>
-    당첨은 운에 맡기시고, 번호 선택은 가벼운 마음으로 즐겨주세요 😉
+    매주 바뀌는 번호를 보고<br>
+    “이 번호 나올지도?” 상상해보는 맛이죠!<br>
+    당첨은 운에 맡기시고, <br>
+    번호 선택은 가벼운 마음으로 즐겨주세요 😉
   </div>
 
   <script>
@@ -94,10 +96,8 @@
         lottoData = data;
         const latest = data[data.length - 1];
 
-        // 날짜 한국식으로 표시 + 요일
-        const dateStr = new Date(latest.date);
-        const days = ['일', '월', '화', '수', '목', '금', '토'];
-        const formattedDate = `${dateStr.getFullYear()}년 ${dateStr.getMonth() + 1}월 ${dateStr.getDate()}일 (${days[dateStr.getDay()]})`;
+        // 날짜 문자열 그대로 사용
+        const formattedDate = latest.date;
 
         const balls = latest.numbers.map(n => `<span class='ball ${getColorClass(n)}'>${n}</span>`).join('');
         const bonus = `<span style="color: gray; font-weight: normal">+ 보너스</span> <span class='ball bonus'>${latest.bonus}</span>`;
