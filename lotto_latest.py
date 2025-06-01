@@ -3,7 +3,6 @@ import json
 import os
 
 def get_latest_lotto():
-    # 파일에서 가장 최근 회차 번호 확인
     path = "lotto_data.json"
     latest_draw_no = 0
     if os.path.exists(path):
@@ -14,14 +13,13 @@ def get_latest_lotto():
     else:
         data = []
 
-    # 다음 회차부터 시작해서 가장 최신 회차까지 시도
     new_data_added = False
     for draw_no in range(latest_draw_no + 1, latest_draw_no + 5):
         url = f"https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo={draw_no}"
         res = requests.get(url).json()
 
         if res.get("returnValue") != "success":
-            break  # 더 이상 회차 없음
+            break
 
         new_entry = {
             "draw_no": res["drwNo"],
@@ -30,7 +28,6 @@ def get_latest_lotto():
             "bonus": res["bnusNo"]
         }
 
-        # 중복 제거 후 추가
         data = [d for d in data if d["draw_no"] != new_entry["draw_no"]]
         data.append(new_entry)
         new_data_added = True
