@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import json
+import os
 
 def get_latest_lotto():
     url = "https://www.dhlottery.co.kr/gameResult.do?method=byWin"
@@ -17,10 +19,31 @@ def get_latest_lotto():
     if date_info_elem and "추첨일" in date_info_elem.text:
         date = date_info_elem.text.split("추첨일 : ")[1].replace(")", "").strip()
     else:
-        date = "날짜 정보 없음"
+        date = ""
 
-    print(f"🎯 {draw_no}회차 ({date})")
-    print(f"   ➤ 당첨번호: {main_numbers} + 보너스: {bonus_number}")
+    new_entry = {
+        "draw_no": draw_no,
+        "date": date,
+        "numbers": main_numbers,
+        "bonus": bonus_number
+    }
+
+    # 기존 lotto_data.json 로드
+    path = "lotto_data.json"
+    data = []
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            data = [d for d in data if d["draw_no"] != draw_no]  # 중복 제거
+
+    data.append(new_entry)
+    data.sort(key=lambda x: x["draw_no"])
+
+    # 저장
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    print(f"✅ 저장 완료: {draw_no}회차 ({date})")
 
 if __name__ == "__main__":
     get_latest_lotto()
