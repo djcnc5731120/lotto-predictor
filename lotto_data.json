@@ -1,8 +1,32 @@
-[
-  {
-    "draw_no": 1173,
-    "date": "2024-06-01",
-    "numbers": [1, 5, 18, 20, 30, 35],
-    "bonus": 3
-  }
-]
+# .github/workflows/update.yml
+name: Update Lotto Data
+
+on:
+  schedule:
+    - cron: '0 10 * * 6'  # 매주 토요일 오전 10시 (UTC 기준)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run update script
+        run: |
+          pip install requests
+          python lotto_latest.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add lotto_data.json
+          git commit -m "자동 업데이트: 최신 로또 데이터 반영" || echo "No changes"
+          git push
