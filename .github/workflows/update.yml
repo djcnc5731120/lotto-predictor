@@ -1,0 +1,41 @@
+name: Update Lotto Data
+
+on:
+  schedule:
+    - cron: '0 12 * * 6'  # 매주 토요일 오후 9시 (KST = UTC+9)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run lotto update script
+        run: python lotto_latest.py
+
+      - name: Commit and push updated data
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add lotto_data.json
+          git commit -m "✅ 로또 데이터 자동 갱신" || echo "No changes"
+          git push
+
+      - name: GitHub Pages rebuild trigger
+        run: |
+          touch index.html
+          git add index.html
+          git commit -m "🔄 GitHub Pages 강제 리빌드" || echo "No changes"
+          git push
+
+
