@@ -1,60 +1,47 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 import os
 
 def get_latest_lotto():
-    url = "https://www.dhlottery.co.kr/gameResult.do?method=byWin"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    draw_no_elem = soup.select_one(".win_result h4 strong")
-    if not draw_no_elem:
-        print("❌ 회차 정보를 찾을 수 없습니다. 사이트 구조가 변경되었을 수 있습니다.")
-        return
-
-    draw_no_text = draw_no_elem.text.strip()
-    draw_no = int(draw_no_text.replace("회", ""))
-
-    nums = soup.select(".win_result .nums span")
-    if len(nums) < 7:
-        print("❌ 당첨 번호가 부족합니다. 사이트 구조 확인 필요.")
-        return
-
-    main_numbers = [int(n.text) for n in nums[:6]]
-    bonus_number = int(nums[6].text)
-
-    date_info_elem = soup.select_one(".win_result .desc")
-    if date_info_elem and "추첨일" in date_info_elem.text:
-        date = date_info_elem.text.split("추첨일 : ")[1].replace(")", "").strip()
-    else:
-        date = ""
-
-    print(f"✅ {draw_no}회차 확인됨 ({date})")
-    print("번호:", main_numbers, "+", bonus_number)
-
-    new_entry = {
-        "draw_no": draw_no,
-        "date": date,
-        "numbers": main_numbers,
-        "bonus": bonus_number
-    }
-
+    # 파일에서 가장 최근 회차 번호 확인
     path = "lotto_data.json"
-    data = []
+    latest_draw_no = 0
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            data = [d for d in data if d["draw_no"] != draw_no]
+            if data:
+                latest_draw_no = max(item["draw_no"] for item in data)
+    else:
+        data = []
 
-    data.append(new_entry)
-    data.sort(key=lambda x: x["draw_no"])
+    # 다음 회차부터 시작해서 가장 최신 회차까지 시도
+    new_data_added = False
+    for draw_no in range(latest_draw_no + 1, latest_draw_no + 5):
+        url = f"https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo={draw_no}"
+        res = requests.get(url).json()
 
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        if res.get("returnValue") != "success":
+            break  # 더 이상 회차 없음
 
-    print(f"✅ 저장 완료: {draw_no}회차 ({date})")
+        new_entry = {
+            "draw_no": res["drwNo"],
+            "date": res["drwNoDate"],
+            "numbers": [res[f"drwtNo{i}"] for i in range(1, 7)],
+            "bonus": res["bnusNo"]
+        }
+
+        # 중복 제거 후 추가
+        data = [d for d in data if d["draw_no"] != new_entry["draw_no"]]
+        data.append(new_entry)
+        new_data_added = True
+        print(f"✅ 저장 완료: {new_entry['draw_no']}회차 ({new_entry['date']})")
+
+    if new_data_added:
+        data.sort(key=lambda x: x["draw_no"])
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    else:
+        print("ℹ️ 최신 회차까지 이미 반영되어 있습니다.")
 
 if __name__ == "__main__":
     get_latest_lotto()
