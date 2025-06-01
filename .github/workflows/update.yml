@@ -2,8 +2,11 @@ name: Update Lotto Data
 
 on:
   schedule:
-    - cron: '0 12 * * 6'  # 매주 토요일 오후 9시 (KST = UTC+9)
+    - cron: '0 12 * * 6'  # 매주 토요일 오후 9시 (KST)
   workflow_dispatch:
+
+permissions:
+  contents: write  # 🔐 git push를 위해 꼭 필요
 
 jobs:
   update:
@@ -37,5 +40,3 @@ jobs:
           git add index.html
           git commit -m "🔄 GitHub Pages 강제 리빌드" || echo "No changes"
           git push
-
-
